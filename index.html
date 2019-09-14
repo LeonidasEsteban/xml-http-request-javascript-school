@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>XML HTTP Request</title>
+  <style>
+    body {
+      background-image: linear-gradient(#f6bd20 0%, #f6e652 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui;
+      font-size: 20vh;
+      text-transform: uppercase;
+      text-align: center;
+      animation: 5s body infinite linear;
+    }
+    img {
+      height: 20vh;
+      vertical-align: bottom;
+    }
+    p {
+      margin: 0;
+    }
+    @keyframes body {
+      0% {
+        transform: rotateY(0);
+      }
+      100% {
+        transform: rotateY(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <img src="" alt="" id="image">
+    <p id="name"></p>
+  </div>
+  <script>
+    const BASE_URL = 'https://pokeapi.co/api/v2/'
+    const $image = document.querySelector('#image')
+    const $name = document.querySelector('#name')
+    function renderImage(blob) {
+      const domString = URL.createObjectURL(blob)
+      $image.setAttribute('src', domString)
+    }
+    function renderError(status) {
+      $name.textContent = `${status} Pokemon no encontrado`
+    }
+    function renderPokemon(pokemon) {
+      $name.textContent = pokemon.name
+      $image.setAttribute('src', pokemon.sprites.front_default)
+    }
+
+    function ajax({ method = 'GET', url, async = true, responseType = 'json', done = () => {}, error = () => {} }) {
+      const request = new XMLHttpRequest()
+      request.responseType = responseType
+      function status(readyState) {
+        switch (readyState) {
+          case 0 : return 'uninitilized'
+          case 1 : return 'loading'
+          case 2 : return 'loaded'
+          case 3 : return 'interactive'
+          case 4 : return 'completed'
+        }
+      }
+      console.log(status(request.readyState))
+
+      request.onreadystatechange = function () {
+        console.log(request.readyState, status(request.readyState))
+        // if (request.readyState === 2) {
+        //   request.abort()
+        // }
+        // console.log(request.status)
+        if (request.readyState === 4) {
+          if (request.status === 200) {
+            done(request.response)
+          } else {
+            error(request.status)
+          }
+        }
+      }
+      // 1 -> GET POST
+      // 2 -> url / entry point
+      // 3 -> ¿is an async request?
+      request.open(method, url, async)
+      request.send(null)
+
+      // console.log(request.responseText)
+      // return request
+    }
+
+
+    ajax({
+      url: `${BASE_URL}pokemon/25`,
+      // method: 'GET',
+      // async: true,
+      // responseType: 'json',
+      done: renderPokemon,
+      error: renderError,
+    })
+
+
+    // ajax({
+    //   url: `./pikachu.jpeg`,
+    //   // method: 'GET',
+    //   // async: true,
+    //   responseType: 'blob',
+    //   done: renderImage,
+    // })
+
+  </script>
+</body>
+</html>
